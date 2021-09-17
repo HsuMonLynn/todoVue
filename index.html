@@ -33,7 +33,7 @@
                 </form>
                 <ol>
                     <li v-for="(todo,index) in todos">
-                        <input type="checkbox" v-model="todo.completed">
+                        <input type="checkbox" v-model="todo.completed" @click="complete(index)">
                         <span :class="{done : todo.completed}">{{todo.title}}</span>
                         <button v-if="todo.completed" @click="deleteItem(index)" class="btn btn-danger">Delete</button>
                     </li>
@@ -55,23 +55,32 @@
 
         methods:{
             getItem(){
-                let me = this;
-                fetch('https://jsonplaceholder.typicode.com/todos?_limit=3')
-                .then(function(response){
-                    return response.json();
-                })
-                .then(function(json){
-                    me.todos = json
-                })
+                if (localStorage.getItem('lists'))
+                {
+                    this.todos = JSON.parse(localStorage.getItem('lists'))
+                }
             },
             addItem(){
-                let item = {title:this.newItem,completed: false};
+                let item = { title:this.newItem,completed: false };
                 this.todos = [...this.todos,item];
+                localStorage.setItem('lists',JSON.stringify(this.todos));
                 this.newItem = "";
             },
             deleteItem(index){
                 this.todos.splice(index,1);
+                localStorage.setItem('lists',JSON.stringify(this.todos));
+                this.getItem()
             },
+            complete(index){
+                if (this.todos[index].completed === false){
+                    this.todos[index].completed = true
+                }
+                else{
+                    this.todos[index].completed = false
+                }
+                localStorage.setItem('lists',JSON.stringify(this.todos));
+                this.getItem()
+            }
         },
 
         computed:{
@@ -85,6 +94,7 @@
 
         created(){
             this.getItem();
+    
         }
     })
 
